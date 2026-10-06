@@ -38,7 +38,7 @@ The frontend runs at `http://localhost:5173` and proxies `/api` requests to the 
 
 ## Deploy the frontend to Vercel
 
-1. Push this repository to GitHub and import it into Vercel. Use the repository root as the project root; Vercel uses `npm run build` as the build command and `dist` as the output directory for Vite.
+1. Push this repository to GitHub and import it into Vercel. Use the repository root as the project root; Vercel uses `npm run build` as the build command and `dist` as the output directory for Vite. The build script calls both CLIs through Node directly.
 2. Deploy once to get the frontend's production domain, for example `https://your-sales-dashboard.vercel.app`. The API will not load until the Render service is configured in the next steps.
 
 ## Deploy the API to Render
