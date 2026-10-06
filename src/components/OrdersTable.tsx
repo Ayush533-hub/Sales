@@ -1,6 +1,6 @@
-import { recentOrders } from "../data";
+import type { Order } from "../api";
 
-export function OrdersTable() {
+export function OrdersTable({ orders }: { orders: Order[] }) {
   return (
     <div className="table-scroll">
       <table>
@@ -15,7 +15,7 @@ export function OrdersTable() {
           </tr>
         </thead>
         <tbody>
-          {recentOrders.map((order) => (
+          {orders.map((order) => (
             <tr key={order.id}>
               <td className="order-id">{order.id}</td>
               <td>

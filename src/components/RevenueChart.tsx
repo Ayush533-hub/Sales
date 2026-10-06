@@ -7,16 +7,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { revenueData } from "../data";
+import type { RevenuePoint } from "../api";
 
 const currency = (value: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 
-export function RevenueChart() {
+export function RevenueChart({ data }: { data: RevenuePoint[] }) {
   return (
     <div className="chart-wrap revenue-chart">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={revenueData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#7667ed" stopOpacity={0.2} />

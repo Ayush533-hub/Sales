@@ -7,9 +7,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { productData } from "../data";
+import type { ProductPoint } from "../api";
 
-export function ProductChart() {
+export function ProductChart({ data }: { data: ProductPoint[] }) {
   return (
     <>
       <div className="product-legend">
@@ -19,7 +19,7 @@ export function ProductChart() {
       </div>
       <div className="chart-wrap product-chart">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={productData} barGap={5} margin={{ top: 14, right: 4, left: -18, bottom: 0 }}>
+          <BarChart data={data} barGap={5} margin={{ top: 14, right: 4, left: -18, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="#edf0f5" strokeDasharray="4 5" />
             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#9298a8", fontSize: 12 }} dy={9} />
             <YAxis axisLine={false} tickLine={false} tick={{ fill: "#9298a8", fontSize: 12 }} />

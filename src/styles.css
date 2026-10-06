@@ -183,6 +183,11 @@ tbody tr:nth-child(4) .avatar { color: #b75e78; background: #fff0f3; }
 .page-footer { display: flex; justify-content: space-between; padding: 17px 2px 0; color: #a0a4b0; font-size: 9px; }
 .page-footer b { color: #e58296; }
 .mobile-scrim { display: none; }
+.api-state { display: grid; place-items: center; min-height: 100vh; padding: 24px; text-align: center; }
+.api-state > div { max-width: 440px; }
+.api-state .brand-mark { display: inline-flex; justify-content: center; margin-bottom: 16px; }
+.api-state h1 { margin: 0 0 8px; color: #27293b; font: 700 22px "Manrope", sans-serif; }
+.api-state p { margin: 0 0 18px; color: #818697; font-size: 13px; }
 
 @media (min-width: 1500px) {
   .page-content { padding-right: 48px; padding-left: 48px; }

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchDashboardData } from "../api";
+import type { DashboardData } from "../api";
 import { ChannelChart } from "./ChannelChart";
 import { Icon } from "./Icon";
 import { OrdersTable } from "./OrdersTable";
@@ -15,6 +17,43 @@ const navigation = [
 
 export function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    fetchDashboardData()
+      .then((data) => {
+        if (isCurrentRequest) {
+          setDashboard(data);
+          setLoadError(null);
+        }
+      })
+      .catch((error: unknown) => {
+        if (isCurrentRequest) {
+          setLoadError(error instanceof Error ? error.message : "An unexpected error occurred.");
+        }
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [retry]);
+
+  if (!dashboard) {
+    return (
+      <main className="api-state" aria-live="polite">
+        <div>
+          <span className="brand-mark"><span /><span /><span /></span>
+          <h1>{loadError ? "Could not load dashboard" : "Loading dashboard…"}</h1>
+          <p>{loadError || "Connecting to the sales API."}</p>
+          {loadError && <button type="button" className="button button-primary" onClick={() => setRetry((attempt) => attempt + 1)}>Try again</button>}
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -85,10 +124,7 @@ export function DashboardPage() {
           </section>
 
           <section className="stats-grid" aria-label="Key performance indicators">
-            <StatCard label="Total revenue" value="$48,294" change="12.8%" detail="vs. $42,812 last month" icon="chart" tone="purple" />
-            <StatCard label="Total orders" value="1,284" change="8.2%" detail="vs. 1,186 last month" icon="box" tone="teal" />
-            <StatCard label="New customers" value="426" change="4.6%" detail="vs. 407 last month" icon="users" tone="orange" />
-            <StatCard label="Avg. order value" value="$37.61" change="2.4%" detail="vs. $36.73 last month" icon="arrow" tone="blue" />
+            {dashboard.stats.map((stat) => <StatCard key={stat.label} {...stat} />)}
           </section>
 
           <section className="charts-grid" aria-label="Sales analytics">
@@ -97,9 +133,9 @@ export function DashboardPage() {
                 <div><h2>Revenue over time</h2><p>Track your store’s revenue and targets</p></div>
                 <button type="button" className="select-button">This year <span>⌄</span></button>
               </div>
-              <div className="chart-summary"><strong>$48,294</strong><span className="change-pill positive">↑ 12.8%</span><small>vs. last year</small></div>
+              <div className="chart-summary"><strong>{dashboard.revenue.summary}</strong><span className="change-pill positive">↑ {dashboard.revenue.change}</span><small>vs. last year</small></div>
               <div className="chart-key"><span><i className="key-dot revenue-key" />Revenue</span><span><i className="key-dot target-key" />Target</span></div>
-              <RevenueChart />
+              <RevenueChart data={dashboard.revenue.series} />
             </article>
 
             <article className="panel channel-panel">
@@ -107,8 +143,8 @@ export function DashboardPage() {
                 <div><h2>Sales by channel</h2><p>Where your customers find you</p></div>
                 <button type="button" className="more-button" aria-label="More channel options">···</button>
               </div>
-              <ChannelChart />
-              <div className="channel-footnote"><span className="footnote-arrow">↗</span><span><strong>Direct traffic is up 8%</strong><br />compared to last month</span></div>
+              <ChannelChart data={dashboard.channels.data} visitors={dashboard.channels.visitors} />
+              <div className="channel-footnote"><span className="footnote-arrow">↗</span><span><strong>{dashboard.channels.insight}</strong><br />compared to last month</span></div>
             </article>
           </section>
 
@@ -118,26 +154,26 @@ export function DashboardPage() {
                 <div><h2>Top products</h2><p>Sales volume by product this week</p></div>
                 <button type="button" className="select-button">This week <span>⌄</span></button>
               </div>
-              <ProductChart />
+              <ProductChart data={dashboard.products} />
             </article>
             <article className="insight-card">
               <span className="insight-orb">✦</span>
               <p className="eyebrow">WEEKLY INSIGHT</p>
               <h2>You’re on a roll!</h2>
-              <p className="insight-copy">Your revenue is up <strong>12.8%</strong> this month. Keep it up — you’re trending ahead of your October goal.</p>
-              <div className="goal-row"><span>Monthly goal</span><strong>$48,294 <small>/ $60,000</small></strong></div>
-              <div className="progress-track"><span /></div>
-              <div className="progress-footer"><span>80.5% of goal</span><span>12 days left</span></div>
+              <p className="insight-copy">Your revenue is up <strong>{dashboard.insight.revenueChange}</strong> this month. Keep it up — you’re trending ahead of your October goal.</p>
+              <div className="goal-row"><span>Monthly goal</span><strong>{dashboard.insight.revenue} <small>/ {dashboard.insight.goal}</small></strong></div>
+              <div className="progress-track"><span style={{ width: `${dashboard.insight.progress}%` }} /></div>
+              <div className="progress-footer"><span>{dashboard.insight.progress}% of goal</span><span>{dashboard.insight.daysLeft} days left</span></div>
               <button type="button" className="insight-link">View detailed report <span>→</span></button>
             </article>
           </section>
 
           <section className="panel orders-panel">
             <div className="panel-heading orders-heading">
-              <div><h2>Recent orders</h2><p>You’ve received 1,284 orders this month</p></div>
+              <div><h2>Recent orders</h2><p>You’ve received {dashboard.orders.count} orders this month</p></div>
               <button type="button" className="view-all-button">View all orders <span>→</span></button>
             </div>
-            <OrdersTable />
+            <OrdersTable orders={dashboard.orders.recent} />
           </section>
           <footer className="page-footer"><span>© 2024 Selly Inc.</span><span>Made for growing businesses <b>♥</b></span></footer>
         </div>
